@@ -24,10 +24,18 @@ class analitica():
 
     def update_data(self, msj):
         msj_vetor = msj.split(",")
-        new_data = {"fecha": msj_vetor[0], "sensor": msj_vetor[1], "valor": float(msj_vetor[2])}
+        now = datetime.now()
+        date_time = now.strftime('%d.%m.%Y %H:%M:%S')
+        new_data = {"fecha": date_time, "sensor": msj_vetor[0], "valor": float(msj_vetor[1])}
         self.df = self.df.append(new_data, ignore_index=True)
+        self.publicar("temperatura".format(sensor),"{}".format(float(msj_vetor[1]))
+        new_data1 = {"fecha": date_time, "sensor": msj_vetor[2], "valor": float(msj_vetor[3])}
+        self.df = self.df.append(new_data1, ignore_index=True)
+        self.publicar("temperatura".format(sensor),"{}".format(float(msj_vetor[5]))
+        new_data2 = {"fecha": date_time, "sensor": msj_vetor[4], "valor": float(msj_vetor[3])}
+        self.df = self.df.append(new_data2, ignore_index=True)
+        self.publicar("temperatura".format(sensor),"{}".format(float(msj_vetor[5]))
         self.analitica_descriptiva()
-        self.analitica_predictiva()
         self.guardar()
 
     def print_data(self):
@@ -35,7 +43,8 @@ class analitica():
 
     def analitica_descriptiva(self):
         self.operaciones("temperatura")
-        self.operaciones("densidad")
+        self.operaciones("humedad")
+        self.operaciones("presion")
 
     def operaciones(self, sensor):
         df_filtrado = self.df[self.df["sensor"] == sensor]
