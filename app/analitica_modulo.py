@@ -32,9 +32,7 @@ class analitica():
         self.df = self.df.append(new_data, ignore_index=True)
         new_data = {"fecha": date_time, "sensor": msj_vetor[4], "valor": float(msj_vetor[5])}
         self.df = self.df.append(new_data, ignore_index=True)
-        self.publicar("temperatura".format(sensor),"{}".format(float(msj_vetor[1]))
-        self.publicar("humedad".format(sensor),"{}".format(float(msj_vetor[3]))
-        self.publicar("presion".format(sensor),"{}".format(float(msj_vetor[5]))
+
         self.analitica_descriptiva()
         self.guardar()
 
