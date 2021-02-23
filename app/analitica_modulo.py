@@ -28,13 +28,13 @@ class analitica():
         date_time = now.strftime('%d.%m.%Y %H:%M:%S')
         new_data = {"fecha": date_time, "sensor": msj_vetor[0], "valor": float(msj_vetor[1])}
         self.df = self.df.append(new_data, ignore_index=True)
+        new_data = {"fecha": date_time, "sensor": msj_vetor[2], "valor": float(msj_vetor[3])}
+        self.df = self.df.append(new_data, ignore_index=True)
+        new_data = {"fecha": date_time, "sensor": msj_vetor[4], "valor": float(msj_vetor[5])}
+        self.df = self.df.append(new_data, ignore_index=True)
         self.publicar("temperatura".format(sensor),"{}".format(float(msj_vetor[1]))
-        new_data1 = {"fecha": date_time, "sensor": msj_vetor[2], "valor": float(msj_vetor[3])}
-        self.df = self.df.append(new_data1, ignore_index=True)
-        self.publicar("temperatura".format(sensor),"{}".format(float(msj_vetor[5]))
-        new_data2 = {"fecha": date_time, "sensor": msj_vetor[4], "valor": float(msj_vetor[3])}
-        self.df = self.df.append(new_data2, ignore_index=True)
-        self.publicar("temperatura".format(sensor),"{}".format(float(msj_vetor[5]))
+        self.publicar("humedad".format(sensor),"{}".format(float(msj_vetor[3]))
+        self.publicar("presion".format(sensor),"{}".format(float(msj_vetor[5]))
         self.analitica_descriptiva()
         self.guardar()
 
