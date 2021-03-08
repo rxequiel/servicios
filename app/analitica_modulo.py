@@ -36,6 +36,7 @@ class analitica():
         self.publicar("humedad",msj_vetor[3])
         self.publicar("presion",msj_vetor[5])
         self.analitica_descriptiva()
+        self.analitica_predictiva()
         self.guardar()
 
     def print_data(self):
@@ -58,7 +59,8 @@ class analitica():
 
     def analitica_predictiva(self):
         self.regresion("temperatura")
-        self.regresion("densidad")
+        self.regresion("humedad")
+        self.regresion("presion")
 
     def regresion(self, sensor):
         df_filtrado = self.df[self.df["sensor"] == sensor]
