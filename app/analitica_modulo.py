@@ -16,12 +16,22 @@ class analitica():
         self.load_data()
 
     def load_data(self):
-
+        print(os.path)
         if not os.path.isfile(self.file_name):
             self.df = pd.DataFrame(columns=["fecha", "sensor", "valor"])
         else:
             self.df = pd.read_csv (self.file_name)
-
+            
+            
+    # def publicar_antiguos(self):
+    #     ant_temp= self.df[self.df["sensor"] == "temperatura"]
+    #     ant_hum= self.df[self.df["sensor"] == "humedad"]
+    #     ant_pre= self.df[self.df["sensor"] == "presion"]
+    #     for index, row in self.df.iterrows():
+    #         print(row)
+        
+        
+        
     def update_data(self, msj):
         msj_vetor = msj.split(",")
         now = datetime.now()
@@ -32,6 +42,7 @@ class analitica():
         self.df = self.df.append(new_data, ignore_index=True)
         new_data = {"fecha": date_time, "sensor": msj_vetor[4], "valor": float(msj_vetor[5])}
         self.df = self.df.append(new_data, ignore_index=True)
+        # self.publicar_antiguos(self)
         self.publicar("temperatura",msj_vetor[1])
         self.publicar("humedad",msj_vetor[3])
         self.publicar("presion",msj_vetor[5])
@@ -84,7 +95,7 @@ class analitica():
         for tiempo, prediccion in zip(nuevos_tiempos, Y_pred):
             time_format = datetime.utcfromtimestamp(tiempo)
             date_time = time_format.strftime('%d.%m.%Y %H:%M:%S')
-            self.publicar("prediccion-{}".format(sensor), "{},{}".format(date_time,prediccion[0]))
+            self.publicar("prediccion-{}".format(sensor), "{topic:{},payload:{},timestamp:{}}".format(sensor,prediccion[0],date_time))
     @staticmethod
     def publicar(cola, mensaje):
         connexion = pika.BlockingConnection(pika.ConnectionParameters(host='rabbit'))
