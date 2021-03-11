@@ -63,7 +63,7 @@ class analitica():
         df_filtrado = df_filtrado["valor"]
         df_filtrado = df_filtrado.tail(self.ventana)
         if df_filtrado.max(skipna = True) > 34:
-            publicar("alerta/max-{}".format(temperatura)),"alerta detectada")
+            self.publicar("alerta/max-{}".format(sensor.temperatura),"alerta detectada")
         self.publicar("max-{}".format(sensor), str(df_filtrado.max(skipna = True)))
         self.publicar("min-{}".format(sensor), str(df_filtrado.min(skipna = True)))
         self.publicar("mean-{}".format(sensor), str(df_filtrado.mean(skipna = True)))
