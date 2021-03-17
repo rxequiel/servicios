@@ -10,12 +10,12 @@ import pika
 class analitica():
     ventana = 15
     pronostico = 1
-    file_name = "data_base.csv "
-    servidor = "rabbit"
+    file_name = "data_base.csv " #Nombre del archivo donde se almacena los datos 
+    servidor = "rabbit"          #nombre del servidor de rabbit al que se conectara
     desc = {}  # diccionario con los datos de analitica descriptiva
     pred = {}  # diccionario con los datos de analitica predictiva
 
-    def __init__(self):
+    def __init__(self): #se ejecuta al iniciar la clase de analitica
         self.load_data()
 
     def load_data(self):
@@ -23,24 +23,16 @@ class analitica():
             self.df = pd.DataFrame(columns=["fecha", "sensor", "valor"])
         else:
             self.df = pd.read_csv(self.file_name, index_col=False)
-        # print(self.df)
-
-    # def publicar_antiguos(self):
-    #     ant_temp= self.df[self.df["sensor"] == "temperatura"]
-    #     ant_hum= self.df[self.df["sensor"] == "humedad"]
-    #     ant_pre= self.df[self.df["sensor"] == "presion"]
-    #     for index, row in self.df.iterrows():
-    #         print(row)
 
     def update_data(self, msj):
-        msj_vetor = msj.split(",")
-        now = datetime.datetime.now()
-        date_time = now.strftime('%d.%m.%Y %H:%M:%S')
+        msj_vetor = msj.split(",")     #separa el mensaje por comas
+        now = datetime.datetime.now()  #crea una variable para la hora
+        date_time = now.strftime('%d.%m.%Y %H:%M:%S')   #se le da formato a la hora 
 
-        new_data = [
-            {"fecha": date_time,
-             "sensor": msj_vetor[0],
-             "valor": float(msj_vetor[1])
+        new_data = [             #vector donde se almacenaran los datos entrentes despues que se separen por comas 
+            {"fecha": date_time,          #le da la hora de llegada del dato
+             "sensor": msj_vetor[0],      #almacena en la columna sensor el nombre del sensor(temperatura)
+             "valor": float(msj_vetor[1]) #almacena en la columna valor el valor que entrega el sensor
              },
             {"fecha": date_time,
              "sensor": msj_vetor[2],
@@ -51,11 +43,11 @@ class analitica():
              "valor": float(msj_vetor[5])
              }
         ]
-        self.df = self.df.append(new_data, ignore_index=True)
-        self.guardar()
-        self.publicar("temperatura", msj_vetor[1])
-        self.publicar("humedad", msj_vetor[3])
-        self.publicar("presion", msj_vetor[5])
+        self.df = self.df.append(new_data, ignore_index=True) #guarda los datos en el dataframe
+        self.guardar()     #llama a la funcion guardar, que es la encargada de guardar los df en el archivo csv
+        self.publicar("temperatura", msj_vetor[1])  #publicamos los valores de los sensores por separado 
+        self.publicar("humedad", msj_vetor[3])      #publicamos los valores de los sensores por separado
+        self.publicar("presion", msj_vetor[5])      #publicamos los valores de los sensores por separado
 
         self.desc.update(
             {"temperatura": {"actual": {"fecha": date_time, "valor": float(msj_vetor[1])}}})
@@ -63,29 +55,27 @@ class analitica():
             {"humedad": {"actual": {"fecha": date_time, "valor": float(msj_vetor[3])}}})
         self.desc.update(
             {"presion": {"actual": {"fecha": date_time, "valor": float(msj_vetor[5])}}})
-        # print(self.desc)
-        self.analitica_descriptiva()
-        self.analitica_predictiva()
-        self.alertas(float(msj_vetor[1]),float(msj_vetor[3]))
+        self.analitica_descriptiva()   #se llama a la funcion de calculos de analitica descriptiva
+        self.analitica_predictiva()    #se llama a la funcion de calculos de analitica predictiva
+        self.alertas(float(msj_vetor[1]),float(msj_vetor[3]), float(msj_vector[5])) #se llama a la funcion de las alertas y se le entregan los datos de los sensores
 
-    def print_data(self):
-        print(self.df)
-
-    def alertas(self, temperatura, humedad):
+    def alertas(self, temperatura, humedad, presion):
 
         if "temperatura" not in self.pred:
             self.pred["temperatura"]["alertas"] = 0
         if "alertas" not in self.pred["humedad"]:
             self.pred["humedad"]["alertas"] = 0
+        if "alertas" not in self.pred["presion"]:
+            self.pred["presion"]["alertas"] = 0
 
-        if self.pred["temperatura"]["datos"][0]["valor"] >= 13 or self.pred["temperatura"]["datos"][0]["valor"] <= 7:
+        if self.pred["temperatura"]["datos"][0]["valor"] >= 35 or self.pred["temperatura"]["datos"][0]["valor"] <= 30:
 
             if self.pred["temperatura"]["alertas"] < 5:
                 self.pred["temperatura"]["alertas"] = self.pred["temperatura"]["alertas"]+1
             else:
                 self.pred["temperatura"]["alertas"] = 0
 
-        if temperatura >= 13 or temperatura <= 7:
+        if temperatura >= 35 or temperatura <= 30:
             if self.pred["temperatura"]["alertas"] == 5:
 
                 self.publicar("alerta-temperatura", "error,El valor actual de temperatura relativa se encuentra por fuera de los valores recomendados;alerta,Los valores predecidos de temperatura se encuentran por fuera de los valores recomendados")
@@ -99,13 +89,13 @@ class analitica():
             else:
                 self.publicar("alerta-temperatura", "normal,;normal,")
 
-        if self.pred["humedad"]["datos"][0]["valor"] >= 95 or self.pred["humedad"]["datos"][0]["valor"] <= 90:
+        if self.pred["humedad"]["datos"][0]["valor"] >= 70 or self.pred["humedad"]["datos"][0]["valor"] <= 40:
             if self.pred["humedad"]["alertas"] < 5:
                 self.pred["humedad"]["alertas"] = self.pred["humedad"]["alertas"]+1
             else:
                 self.pred["humedad"].update(alertas = 0)
 
-        if humedad >= 95 or humedad <= 90:
+        if humedad >= 70 or humedad <= 40:
             if self.pred["humedad"]["alertas"] == 5:
                 self.pred["humedad"]["alertas"] = 0
                 self.publicar("alerta-humedad", "error,El valor actual de humedad relativa se encuentra por fuera de los valores recomendados;alerta,Los valores predecidos de humedad se encuentran por fuera de los valores recomendados")
@@ -119,6 +109,30 @@ class analitica():
                     "alerta-humedad", ";alerta,Los valores predecidos de humedad se encuentran por fuera de los valores recomendados")
             else:
                 self.publicar("alerta-humedad", "normal,;normal,")
+
+        if self.pred["presion"]["datos"][4]["valor"] >= 1050 or self.pred["presion"]["datos"][4]["valor"] <= 1000:
+            if self.pred["presion"]["alertas"] < 5:
+                self.pred["presion"]["alertas"] = self.pred["presion"]["alertas"]+1
+            else:
+                self.pred["presion"].update(alertas = 0)
+
+        if presion >= 1050 or presion <= 1000:
+            if self.pred["presion"]["alertas"] == 5:
+                self.pred["presion"]["alertas"] = 0
+                self.publicar("alerta-presion", "error,El valor actual de presion se encuentra por fuera de los valores recomendados;alerta,Los valores predecidos de presion se encuentran por fuera de los valores recomendados")
+            else:
+                self.publicar(
+                    "alerta-presion", "error,El valor actual de presion se encuentra por fuera de los valores recomendados;")
+        else:
+            if self.pred["presion"]["alertas"] == 5:
+                self.pred["presion"]["alertas"] = 0
+                self.publicar(
+                    "alerta-presion", ";alerta,Los valores predecidos de presion se encuentran por fuera de los valores recomendados")
+            else:
+                self.publicar("alerta-presion", "normal,;normal,")
+
+
+
 
     def analitica_descriptiva(self):
         self.operaciones("temperatura")
@@ -141,8 +155,6 @@ class analitica():
         df_filtrado = self.df[self.df["sensor"] == sensor]
         df_filtrado = df_filtrado["valor"]
         df_filtrado = df_filtrado.tail(self.ventana)
-        # if df_filtrado.max(skipna = True) > 34:
-        #     self.publicar("alerta/max-{}".format(sensor),"alerta detectada")
         self.desc[sensor].update({
             "max": df_filtrado.max(skipna=True),
             "min": df_filtrado.min(skipna=True),
