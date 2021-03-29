@@ -1,6 +1,4 @@
-
 version: '3.3'
-
 services:
   node:
     container_name: ui
@@ -9,7 +7,8 @@ services:
       context: .
       dockerfile: Dockerfile.node
     volumes:
-     - ./app:/app
+      - ./app:/app
+      - ./app/data:/data
     ports:
       - "1880:1880"
   analitica:
@@ -20,7 +19,7 @@ services:
       context: .
       dockerfile: Dockerfile.analitica
     volumes:
-     - ./app:/app
+      - ./app:/app
     depends_on:
       - rabbit
   rabbit:
@@ -38,7 +37,8 @@ services:
       default:
         aliases:
           - rabbit
-
+volumes: 
+  app:
 networks:
   default:
     ipam:
