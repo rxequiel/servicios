@@ -651,7 +651,7 @@
     "node-red-contrib-notification-center": {
         "name": "node-red-contrib-notification-center",
         "version": "0.0.2",
-        "local": false,
+        "local": true,
         "nodes": {
             "nc": {
                 "name": "nc",

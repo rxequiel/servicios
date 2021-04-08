@@ -57,13 +57,13 @@ class analitica():
             self.df = pd.read_csv(self.file_name, index_col=False)
 
     def update_data(self, msj):
-        print(msj)
+        # print(msj)
         # "temperatura,36.4,humedad,95,presion,1002" Este es el mensaje que manda el micro
+        now = datetime.datetime.now()
+        date_time = now.strftime('%d.%m.%Y %H:%M:%S')
 
         msj_vector = msj.split(",")  # Se separa el mensaje por comas
         # ["temperatura","36.4","humedad","95","presion","1002"]
-        now = datetime.datetime.now()
-        date_time = now.strftime('%d.%m.%Y %H:%M:%S')
 
         new_data = [
             {"fecha": date_time,            # 16.03.2021 22:45:00
@@ -86,97 +86,22 @@ class analitica():
         self.guardar()  # guardamos el DataFrame en el archivo CSV
 
         # Enviamos al AMQP el valor de temperatura
-        self.publicar("temperatura", msj_vector[1])
+        self.publicar(msj_vector[0], msj_vector[1])
         # Enviamos al AMQP el valor de temperatura
-        self.publicar("humedad", msj_vector[3])
+        self.publicar(msj_vector[2], msj_vector[3])
         # Enviamos al AMQP el valor de temperatura
-        self.publicar("presion", msj_vector[5])
+        self.publicar(msj_vector[4], msj_vector[5])
 
-        self.analitica_descriptiva()
-        self.analitica_predictiva()
+        self.analitica_descriptiva(msj_vector)
+        self.analitica_predictiva(msj_vector)
         self.alertas(float(msj_vector[1]), float(
             msj_vector[3]), float(msj_vector[5]))
 
-    @ staticmethod
-    def hallar_max(array, key):
-        max = array[0][key]
-        for x in array:
-            if x[key] > max:
-                max = x[key]
-        return max
-
-    def alertas(self, temperatura, humedad, presion):
-
-        ########### ALERTAS TEMPERATURA ###################
-        alerta_temp = "normal,;"
-        pred_temp = self.hallar_max(self.pred["temperatura"]["datos"], "valor")
-
-        ### Valor Actual ###
-        if temperatura >= 35:
-            alerta_temp = "error,El valor actual de temperatura se encuentra por encima de 35°C (el valor maximo recomendable);"
-        elif temperatura <= 30:
-            alerta_temp = "error,El valor actual de temperatura se encuentra por debajo de 30°C (el valor minimo recomendable);"
-        ### Valor Predicho ###
-        if pred_temp >= 35:
-            alerta_temp = alerta_temp + \
-                "alerta,Se calcula una tendencia de temperatura por encima de 35°C (el valor maximo recomendable)"
-        elif pred_temp <= 30:
-            alerta_temp = alerta_temp + \
-                "alerta,Se calcula una tendencia de temperatura por debajo de 30°C (el valor minimo recomendable)"
-        else:
-            alerta_temp = alerta_temp+"normal,"
-
-        self.publicar("alerta-temperatura", alerta_temp)
-
-        ########### ALERTAS HUMEDAD ###################
-        alerta_hum = "normal,;"
-        pred_hum = self.hallar_max(self.pred["humedad"]["datos"], "valor")
-
-        ### Valor Actual ###
-        if humedad >= 60:
-            alerta_hum = "error,El valor actual de la humedad relativa se encuentra por encima del 60% (el valor maximo recomendable);"
-        elif humedad <= 40:
-            alerta_hum = "error,El valor actual de la humedad relativa se encuentra por debajo de 40% (el valor minimo recomendable);"
-        ### Valor Predicho ###
-        if pred_hum >= 60:
-            alerta_hum = alerta_hum + \
-                "alerta,Se calcula una tendencia de humedad relativa por encima del 60% (el valor maximo recomendable)"
-        elif pred_hum <= 40:
-            alerta_hum = alerta_hum + \
-                "alerta,Se calcula una tendencia de humedad relativa por debajo de 40% (el valor minimo recomendable)"
-        else:
-            alerta_hum = alerta_hum+"normal,"
-
-        self.publicar("alerta-humedad", alerta_hum)
-
-        ########### ALERTAS PRESION ###################
-        alerta_pres = "normal,;"
-        pred_hum = self.hallar_max(self.pred["presion"]["datos"], "valor")
-        ### Valor Actual ###
-        if presion >= 1100:
-            alerta_pres = "error,El valor actual de la presion relativa se encuentra por encima del 1100hPa (el valor maximo recomendable);"
-        elif presion <= 1000:
-            alerta_pres = "error,El valor actual de la presion relativa se encuentra por debajo de 1000hPa (el valor minimo recomendable);"
-        ### Valor Predicho ###
-        if pred_hum >= 1100:
-            alerta_pres = alerta_pres + \
-                "alerta,Se calcula una tendencia de presion por encima del 1100hPa (el valor maximo recomendable)"
-        elif pred_hum <= 1000:
-            alerta_pres = alerta_pres + \
-                "alerta,Se calcula una tendencia de presion por debajo de 1000hPa (el valor minimo recomendable)"
-        else:
-            alerta_pres = alerta_pres+"normal,"
-
-        self.publicar("alerta-presion", alerta_pres)
-
-    ################# ENVIO EMAIL DE ALERTA #########################
-        # gmail(alerta_temp+"/"+alerta_hum+"/"+alerta_pres)  # DESCOMENTAR PARA EL ENVIO DE EMAIL
-
-    def analitica_descriptiva(self):
+    def analitica_descriptiva(self, msj_vector):
         # Calculando y almacenando las estadisticas de cada sensor
-        self.operaciones("temperatura")
-        self.operaciones("humedad")
-        self.operaciones("presion")
+        self.operaciones(msj_vector[0])  # SENSOR DE TEMPERATURA
+        self.operaciones(msj_vector[2])  # Sensor de humedad
+        self.operaciones(msj_vector[4])  # Sensor de Presion
         # Recorrer el diccionario, Accediendo a cada tipo de sensor
         for sensor in self.desc:
             self.publicar("max-{}".format(sensor),
@@ -192,11 +117,11 @@ class analitica():
 
     def operaciones(self, sensor):
         # Filtra en el DF TODOS los datos de sensor
-        df_filtrado = self.df[self.df["sensor"] == sensor]
-        df_filtrado = df_filtrado["valor"]
+        df_filtrado_todos = self.df[self.df["sensor"] == sensor]
+        df_filtrado_valor = df_filtrado_todos["valor"]
         # Filtramos los ultimos n valores del df
-        df_filtrado = df_filtrado.tail(self.ventana)
-        # almacenamos en el diccionario desc las estadisticas del sensor pasado por parametros
+        df_filtrado = df_filtrado_valor.tail(self.ventana)
+        # Actualizamos almacenando en el diccionario desc las estadisticas del sensor pasado por parametros
         self.desc[sensor].update({
             "max": df_filtrado.max(skipna=True),
             "min": df_filtrado.min(skipna=True),
@@ -205,23 +130,24 @@ class analitica():
             "std": df_filtrado.std(skipna=True)
         })
 
-    def analitica_predictiva(self):
-        self.regresion("temperatura")
-        self.regresion("humedad")
-        self.regresion("presion")
-        for sensor in self.pred:
-            self.publicar("prediccion-{}".format(sensor), "{},{}".format(
-                self.pred[sensor]["datos"][0]["valor"], self.pred[sensor]["datos"][0]["tiempof"]))
-
-    def regresion(self, sensor):
+    def analitica_predictiva(self, msj_vector):
         if self.pred == {}:
             self.pred = {
                 "temperatura": {"datos": []},
                 "humedad": {"datos": []},
                 "presion": {"datos": []},
             }
-        df_filtrado = self.df[self.df["sensor"] == sensor]
-        df_filtrado = df_filtrado.tail(self.ventana)
+        self.regresion(msj_vector[0])  # temperatura
+        self.regresion(msj_vector[2])  # humedad
+        self.regresion(msj_vector[4])  # presion
+        
+        for sensor in self.pred:
+            self.publicar("prediccion-{}".format(sensor), "{},{}".format(self.pred[sensor]["datos"][0]["valor"], self.pred[sensor]["datos"][0]["tiempof"]))
+                                                            #"33.5,21/03/2121/ 11:03:00"
+    def regresion(self, sensor):
+        self.pred[sensor]["datos"] = []
+        df_filtrado_todos = self.df[self.df["sensor"] == sensor]
+        df_filtrado = df_filtrado_todos.tail(self.ventana)
         df_filtrado['fecha'] = pd.to_datetime(
             df_filtrado.pop('fecha'), format='%d.%m.%Y %H:%M:%S')
         df_filtrado['segundos'] = [time.mktime(
@@ -232,18 +158,14 @@ class analitica():
         tiempo = int(round(tiempo))
         ultimo_tiempo = df_filtrado['segundos'].iloc[-1]
         ultimo_tiempo = ultimo_tiempo.astype(int)
-        range(ultimo_tiempo + tiempo, (self.pronostico + 1)
-              * tiempo + ultimo_tiempo, tiempo)
         nuevos_tiempos = np.array(range(
             ultimo_tiempo + tiempo, (self.pronostico + 1) * tiempo + ultimo_tiempo, tiempo))
-
         X = df_filtrado["segundos"].to_numpy().reshape(-1, 1)
         Y = df_filtrado["valor"].to_numpy().reshape(-1, 1)
         linear_regressor = LinearRegression()
         linear_regressor.fit(X, Y)
         Y_pred = linear_regressor.predict(nuevos_tiempos.reshape(-1, 1))
-
-        self.pred[sensor]["datos"] = []
+        
 
         for tiempo, prediccion in zip(nuevos_tiempos, Y_pred):
             time_format = datetime.datetime.fromtimestamp(tiempo)
@@ -253,6 +175,81 @@ class analitica():
                 "tiempof": date_time,
                 "valor": prediccion[0]
             })
+
+
+    @ staticmethod
+    def hallar_max(array, key):
+        max = array[0][key]
+        for x in array:
+            if x[key] > max:
+                max = x[key]
+        return max
+
+    def alertas(self, temperatura, humedad, presion):
+        
+        ########### ALERTAS TEMPERATURA ###################
+        estado_temp = "normal;"
+        pred_temp = self.hallar_max(self.pred["temperatura"]["datos"], "valor")
+
+        ### Valor Actual ##- #
+        if temperatura >= 13:
+            estado_temp = "El valor actual de temperatura se encuentra por encima de 13°C (el valor maximo recomendable);"
+        elif temperatura <= 7:
+            estado_temp = "El valor actual de temperatura se encuentra por debajo de 7°C (el valor minimo recomendable);"
+        ### Valor Predicho ###
+        if pred_temp >= 13:
+            estado_temp = estado_temp +  "Se calcula una tendencia de temperatura por encima de 13°C (el valor maximo recomendable)"
+        elif pred_temp <= 7:
+            estado_temp = estado_temp + "Se calcula una tendencia de temperatura por debajo de 7°C (el valor minimo recomendable)"
+        else:
+            estado_temp = estado_temp+"normal"
+
+        self.publicar("alerta-temperatura", estado_temp)
+
+        ########### ALERTAS HUMEDAD ###################
+        estado_hum = "normal;"
+        pred_hum = self.hallar_max(self.pred["humedad"]["datos"], "valor")
+
+        ### Valor Actual ###
+        if humedad >= 95:
+            estado_hum = "El valor actual de la humedad relativa se encuentra por encima del 95% (el valor maximo recomendable);"
+        elif humedad <= 90:
+            estado_hum = "El valor actual de la humedad relativa se encuentra por debajo de 90% (el valor minimo recomendable);"
+        ### Valor Predicho ###
+        if pred_hum >= 95:
+            estado_hum = estado_hum + "Se calcula una tendencia de humedad relativa por encima del 95% (el valor maximo recomendable)"
+        elif pred_hum <= 90:
+            estado_hum = estado_hum + "Se calcula una tendencia de humedad relativa por debajo de 90% (el valor minimo recomendable)"
+        else:
+            estado_hum = estado_hum+"normal"
+
+        self.publicar("alerta-humedad", estado_hum)
+
+        ########### ALERTAS PRESION ###################
+        estado_pres = "normal;"
+        pred_hum = self.hallar_max(self.pred["presion"]["datos"], "valor")
+
+        ### Valor Actual ###
+        if presion >= 1000:
+            estado_pres = "El valor actual de la presion relativa se encuentra por encima del 1000hPa (el valor maximo recomendable);"
+        elif presion <= 900:
+            estado_pres = "El valor actual de la presion relativa se encuentra por debajo de 900hPa (el valor minimo recomendable);"
+        ### Valor Predicho ###
+        if pred_hum >= 1000:
+            estado_pres = estado_pres + "Se calcula una tendencia de presion por encima del 1000hPa (el valor maximo recomendable)"
+        elif pred_hum <= 900:
+            estado_pres = estado_pres + "Se calcula una tendencia de presion por debajo de 900hPa (el valor minimo recomendable)"
+        else:
+            estado_pres = estado_pres + "normal"
+
+        self.publicar("alerta-presion", estado_pres)
+
+    ################# ENVIO EMAIL DE ALERTA #########################
+        if (estado_temp != "normal;normal" or estado_hum != "normal;normal" or estado_pres != "normal;normal" ):
+            print("Alguna Alerta, Enviando mensaje")
+            gmail(estado_temp+"/"+estado_hum+"/"+estado_pres)  # DESCOMENTAR PARA EL ENVIO DE EMAIL
+        else: 
+            print("Todo Ok")
 
     @ staticmethod
     def publicar(cola, mensaje):

@@ -11,11 +11,11 @@ while 1:
     channel = connection.channel()  # start a channel
     # channel.queue_declare(queue='mensajes') # Declare a queue
 
-    def callback(ch, method, propperties, body):
+    def callback(channel, method, propperties, body):
         analitica().update_data(body.decode("utf-8"))
         return
-
-    # set up subscription on the queue
+    
+    # Configurando el canal para el consumo de la cola
     channel.basic_consume('mensajes', callback, auto_ack=True)
 
     # start consuming (blocks)
