@@ -113,16 +113,16 @@ class analitica():
 
         ### Valor Actual ###
         if temperatura >= 35:
-            alerta_temp = "error,El valor actual de temperatura se encuentra por encima de 13°C (el valor maximo recomendable);"
+            alerta_temp = "error,El valor actual de temperatura se encuentra por encima de 35°C (el valor maximo recomendable);"
         elif temperatura <= 30:
-            alerta_temp = "error,El valor actual de temperatura se encuentra por debajo de 7°C (el valor minimo recomendable);"
+            alerta_temp = "error,El valor actual de temperatura se encuentra por debajo de 30°C (el valor minimo recomendable);"
         ### Valor Predicho ###
         if pred_temp >= 35:
             alerta_temp = alerta_temp + \
-                "alerta,Se calcula una tendencia de temperatura por encima de 13°C (el valor maximo recomendable)"
+                "alerta,Se calcula una tendencia de temperatura por encima de 35°C (el valor maximo recomendable)"
         elif pred_temp <= 30:
             alerta_temp = alerta_temp + \
-                "alerta,Se calcula una tendencia de temperatura por debajo de 7°C (el valor minimo recomendable)"
+                "alerta,Se calcula una tendencia de temperatura por debajo de 30°C (el valor minimo recomendable)"
         else:
             alerta_temp = alerta_temp+"normal,"
 
@@ -134,16 +134,16 @@ class analitica():
 
         ### Valor Actual ###
         if humedad >= 60:
-            alerta_hum = "error,El valor actual de la humedad relativa se encuentra por encima del 95% (el valor maximo recomendable);"
+            alerta_hum = "error,El valor actual de la humedad relativa se encuentra por encima del 60% (el valor maximo recomendable);"
         elif humedad <= 40:
-            alerta_hum = "error,El valor actual de la humedad relativa se encuentra por debajo de 90% (el valor minimo recomendable);"
+            alerta_hum = "error,El valor actual de la humedad relativa se encuentra por debajo de 40% (el valor minimo recomendable);"
         ### Valor Predicho ###
         if pred_hum >= 60:
             alerta_hum = alerta_hum + \
-                "alerta,Se calcula una tendencia de humedad relativa por encima del 95% (el valor maximo recomendable)"
+                "alerta,Se calcula una tendencia de humedad relativa por encima del 60% (el valor maximo recomendable)"
         elif pred_hum <= 40:
             alerta_hum = alerta_hum + \
-                "alerta,Se calcula una tendencia de humedad relativa por debajo de 90% (el valor minimo recomendable)"
+                "alerta,Se calcula una tendencia de humedad relativa por debajo de 40% (el valor minimo recomendable)"
         else:
             alerta_hum = alerta_hum+"normal,"
 
@@ -152,19 +152,18 @@ class analitica():
         ########### ALERTAS PRESION ###################
         alerta_pres = "normal,;"
         pred_hum = self.hallar_max(self.pred["presion"]["datos"], "valor")
-
         ### Valor Actual ###
         if presion >= 1100:
-            alerta_pres = "error,El valor actual de la presion relativa se encuentra por encima del 1000hPa (el valor maximo recomendable);"
+            alerta_pres = "error,El valor actual de la presion relativa se encuentra por encima del 1100hPa (el valor maximo recomendable);"
         elif presion <= 1000:
-            alerta_pres = "error,El valor actual de la presion relativa se encuentra por debajo de 900hPa (el valor minimo recomendable);"
+            alerta_pres = "error,El valor actual de la presion relativa se encuentra por debajo de 1000hPa (el valor minimo recomendable);"
         ### Valor Predicho ###
         if pred_hum >= 1100:
             alerta_pres = alerta_pres + \
-                "alerta,Se calcula una tendencia de presion por encima del 1000hPa (el valor maximo recomendable)"
+                "alerta,Se calcula una tendencia de presion por encima del 1100hPa (el valor maximo recomendable)"
         elif pred_hum <= 1000:
             alerta_pres = alerta_pres + \
-                "alerta,Se calcula una tendencia de presion por debajo de 900hPa (el valor minimo recomendable)"
+                "alerta,Se calcula una tendencia de presion por debajo de 1000hPa (el valor minimo recomendable)"
         else:
             alerta_pres = alerta_pres+"normal,"
 
