@@ -247,13 +247,8 @@ class analitica():
 
     ################# ENVIO EMAIL DE ALERTA #########################
         if (estado_temp != "normal;normal" or estado_hum != "normal;normal" or estado_pres != "normal;normal" ):
-            if self.conteo_alerta>=5:
-                print("Enviando mensaje")
-                gmail(estado_temp+"/"+estado_hum+"/"+estado_pres)  # DESCOMENTAR PARA EL ENVIO DE EMAIL
-                self.conteo_alerta=0
-            else: 
-                self.conteo_alerta+=1
-                print("Alguna Alerta, Contando pa enviar mensaje")
+            print("Enviando mensaje")
+            gmail(estado_temp+"/"+estado_hum+"/"+estado_pres)  # DESCOMENTAR PARA EL ENVIO DE EMAIL
         else: 
             print("Todo Ok")
 
