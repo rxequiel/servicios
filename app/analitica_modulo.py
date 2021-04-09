@@ -227,7 +227,7 @@ class analitica():
 
         ########### ALERTAS PRESION ###################
         estado_pres = "normal;"
-        pred_hum = self.hallar_max(self.pred["presion"]["datos"], "valor")
+        pred_pres = self.hallar_max(self.pred["presion"]["datos"], "valor")
 
         ### Valor Actual ###
         if presion >= 1100:
@@ -235,9 +235,9 @@ class analitica():
         elif presion <= 900:
             estado_pres = "El valor actual de la presion relativa se encuentra por debajo de 900hPa (el valor minimo recomendable);"
         ### Valor Predicho ###
-        if pred_hum >= 1100:
+        if pred_pres >= 1100:
             estado_pres = estado_pres + "Se calcula una tendencia de presion por encima del 1100hPa (el valor maximo recomendable)"
-        elif pred_hum <= 900:
+        elif pred_pres <= 900:
             estado_pres = estado_pres + "Se calcula una tendencia de presion por debajo de 900hPa (el valor minimo recomendable)"
         else:
             estado_pres = estado_pres + "normal"
