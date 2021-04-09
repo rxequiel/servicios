@@ -1,0 +1,1 @@
+[{"id":"45a3d72e.001f28","type":"inject","z":"b8d47b54.0cf888","g":"10ec5fd0.3604c","name":"","props":[{"p":"payload"},{"p":"topic","vt":"str"}],"repeat":"","crontab":"","once":false,"onceDelay":0.1,"topic":"","payload":"temperatura,32,humedad,55,presion,1000","payloadType":"str","x":330,"y":940,"wires":[["829f83c7.16386"]]}]
