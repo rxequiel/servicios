@@ -63,9 +63,9 @@ def gmail(mensaje):
     msg = email.message.Message()
     msg['Subject'] = 'Alerta del Servidor'
 
-    msg['From'] = '@gmail.com'  # CORREO REMITENTE ############
-    msg['To'] = '@gmail.com'  # CORREO DESTINO ##############
-    password = "*****"  # CONTRASEÑA ##################
+    msg['From'] = 'delahoz27montes@gmail.com'  # CORREO REMITENTE ############
+    msg['To'] = 'javcas430@gmail.com'  # CORREO DESTINO ##############
+    password = "montesdehoz27ezequiel"  # CONTRASEÑA ##################
     msg.add_header('Content-Type', 'text/html')
     msg.set_payload(email_content)
 
