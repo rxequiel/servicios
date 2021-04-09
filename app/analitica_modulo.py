@@ -16,7 +16,7 @@ class analitica():
     pronostico = 1  # Numero de datos a pronosticar
     file_name = "data_base.csv"  # Nombre del archivo CSV
     servidor = "rabbit"  # NPI
-    conteo_alerta = 0 #variable para envio de correos
+    #conteo_alerta = 0 #variable para envio de correos
     desc = {
         "temperatura": {},
         "humedad": {},
