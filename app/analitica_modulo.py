@@ -192,15 +192,15 @@ class analitica():
         pred_temp = self.hallar_max(self.pred["temperatura"]["datos"], "valor")
 
         ### Valor Actual ##- #
-        if temperatura >= 13:
-            estado_temp = "El valor actual de temperatura se encuentra por encima de 13°C (el valor maximo recomendable);"
-        elif temperatura <= 7:
-            estado_temp = "El valor actual de temperatura se encuentra por debajo de 7°C (el valor minimo recomendable);"
+        if temperatura >= 35:
+            estado_temp = "El valor actual de temperatura se encuentra por encima de 35°C (el valor maximo recomendable);"
+        elif temperatura <= 30:
+            estado_temp = "El valor actual de temperatura se encuentra por debajo de 30°C (el valor minimo recomendable);"
         ### Valor Predicho ###
-        if pred_temp >= 13:
-            estado_temp = estado_temp +  "Se calcula una tendencia de temperatura por encima de 13°C (el valor maximo recomendable)"
-        elif pred_temp <= 7:
-            estado_temp = estado_temp + "Se calcula una tendencia de temperatura por debajo de 7°C (el valor minimo recomendable)"
+        if pred_temp >= 35:
+            estado_temp = estado_temp +  "Se calcula una tendencia de temperatura por encima de 35°C (el valor maximo recomendable)"
+        elif pred_temp <= 30:
+            estado_temp = estado_temp + "Se calcula una tendencia de temperatura por debajo de 30°C (el valor minimo recomendable)"
         else:
             estado_temp = estado_temp+"normal"
 
@@ -211,15 +211,15 @@ class analitica():
         pred_hum = self.hallar_max(self.pred["humedad"]["datos"], "valor")
 
         ### Valor Actual ###
-        if humedad >= 95:
-            estado_hum = "El valor actual de la humedad relativa se encuentra por encima del 95% (el valor maximo recomendable);"
-        elif humedad <= 90:
-            estado_hum = "El valor actual de la humedad relativa se encuentra por debajo de 90% (el valor minimo recomendable);"
+        if humedad >= 60:
+            estado_hum = "El valor actual de la humedad relativa se encuentra por encima del 60% (el valor maximo recomendable);"
+        elif humedad <= 40:
+            estado_hum = "El valor actual de la humedad relativa se encuentra por debajo de 40% (el valor minimo recomendable);"
         ### Valor Predicho ###
-        if pred_hum >= 95:
-            estado_hum = estado_hum + "Se calcula una tendencia de humedad relativa por encima del 95% (el valor maximo recomendable)"
-        elif pred_hum <= 90:
-            estado_hum = estado_hum + "Se calcula una tendencia de humedad relativa por debajo de 90% (el valor minimo recomendable)"
+        if pred_hum >= 60:
+            estado_hum = estado_hum + "Se calcula una tendencia de humedad relativa por encima del 60% (el valor maximo recomendable)"
+        elif pred_hum <= 40:
+            estado_hum = estado_hum + "Se calcula una tendencia de humedad relativa por debajo de 40% (el valor minimo recomendable)"
         else:
             estado_hum = estado_hum+"normal"
 
@@ -230,13 +230,13 @@ class analitica():
         pred_hum = self.hallar_max(self.pred["presion"]["datos"], "valor")
 
         ### Valor Actual ###
-        if presion >= 1000:
-            estado_pres = "El valor actual de la presion relativa se encuentra por encima del 1000hPa (el valor maximo recomendable);"
+        if presion >= 1100:
+            estado_pres = "El valor actual de la presion relativa se encuentra por encima del 1100hPa (el valor maximo recomendable);"
         elif presion <= 900:
             estado_pres = "El valor actual de la presion relativa se encuentra por debajo de 900hPa (el valor minimo recomendable);"
         ### Valor Predicho ###
-        if pred_hum >= 1000:
-            estado_pres = estado_pres + "Se calcula una tendencia de presion por encima del 1000hPa (el valor maximo recomendable)"
+        if pred_hum >= 1100:
+            estado_pres = estado_pres + "Se calcula una tendencia de presion por encima del 1100hPa (el valor maximo recomendable)"
         elif pred_hum <= 900:
             estado_pres = estado_pres + "Se calcula una tendencia de presion por debajo de 900hPa (el valor minimo recomendable)"
         else:
@@ -246,8 +246,13 @@ class analitica():
 
     ################# ENVIO EMAIL DE ALERTA #########################
         if (estado_temp != "normal;normal" or estado_hum != "normal;normal" or estado_pres != "normal;normal" ):
-            print("Alguna Alerta, Enviando mensaje")
-            gmail(estado_temp+"/"+estado_hum+"/"+estado_pres)  # DESCOMENTAR PARA EL ENVIO DE EMAIL
+            if self.conteo_alerta>=5:
+                print("Enviando mensaje")
+                gmail(estado_temp+"/"+estado_hum+"/"+estado_pres)  # DESCOMENTAR PARA EL ENVIO DE EMAIL
+                self.conteo_alerta=0
+            else: 
+                self.conteo_alerta+=1
+                print("Alguna Alerta, Contando pa enviar mensaje")
         else: 
             print("Todo Ok")
 
